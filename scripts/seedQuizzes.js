@@ -1,43 +1,49 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
-import Quiz from '../models/Quiz.js';
 
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/vitacoin', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+// Define schema
+const quizSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  level: { type: String, enum: ['easy', 'medium', 'hard'], required: true },
+  questions: [
+    {
+      question: { type: String, required: true },
+      options: [{ type: String, required: true }],
+      correctAnswer: { type: Number, required: true }, // index of correct option
+    }
+  ],
 });
 
+const Quiz = mongoose.model('Quiz', quizSchema);
+
+// Quiz data
 const quizzes = [
-  // JavaScript Basics (Easy)
+  // Blockchain Basics (Easy)
   {
-    title: 'JavaScript Basics - Quiz',
+    title: 'Blockchain Basics',
     level: 'easy',
     questions: [
       {
-        question: 'Which keyword declares a block-scoped variable in JavaScript?',
-        options: ['var', 'let', 'function', 'class'],
-        correctAnswer: 1
-      },
-      {
-        question: 'const declares:',
-        options: ['A mutable variable', 'An immutable binding', 'A function', 'A string'],
-        correctAnswer: 1
-      },
-      {
-        question: 'Arrow functions are commonly used to:',
-        options: ['Create classes', 'Bind this lexically', 'Import modules', 'Create HTML'],
-        correctAnswer: 1
-      },
-      {
-        question: 'Which is a valid array literal?',
-        options: ['{}', '() => {}', '[]', 'new Object()'],
+        question: 'What is a blockchain?',
+        options: ['A database', 'A type of cryptocurrency', 'A distributed ledger', 'A programming language'],
         correctAnswer: 2
+      },
+      {
+        question: 'Which language is commonly used for smart contracts on Ethereum?',
+        options: ['Python', 'Solidity', 'JavaScript', 'Go'],
+        correctAnswer: 1
+      },
+      {
+        question: 'What does HODL mean?',
+        options: ['Hold On for Dear Life', 'Sell quickly', 'Buy low, sell high', 'Mining'],
+        correctAnswer: 0
       }
     ]
   },
-  // React Fundamentals (Medium)
+
+  // React Basics (Medium)
   {
-    title: 'React Fundamentals - Quiz',
+    title: 'React Basics',
     level: 'medium',
     questions: [
       {
@@ -62,6 +68,7 @@ const quizzes = [
       }
     ]
   },
+
   // Full-Stack Project (Hard)
   {
     title: 'Full-Stack Project - Quiz',
@@ -91,11 +98,22 @@ const quizzes = [
   }
 ];
 
-async function seed() {
-  await Quiz.deleteMany({});
-  await Quiz.insertMany(quizzes);
-  console.log('Dummy quizzes seeded!');
-  mongoose.disconnect();
+// Seeder function
+async function seedQuizzes() {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
+    await Quiz.deleteMany({});
+    await Quiz.insertMany(quizzes);
+    console.log('✅ Quizzes seeded successfully!');
+  } catch (err) {
+    console.error('❌ Error seeding quizzes:', err);
+  } finally {
+    await mongoose.disconnect();
+  }
 }
 
-seed();
+seedQuizzes();
