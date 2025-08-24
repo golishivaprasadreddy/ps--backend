@@ -13,26 +13,24 @@ const router = express.Router();
 // Registration endpoint
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'Email already registered.' });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashedPassword, coins: 100 });
-    await user.save();
-    const transaction = new Transaction({
-      userId: user._id,
-      type: 'credit',
-      amount: 100,
-      reason: 'Welcome Gift',
-    });
-    await transaction.save();
-    // Issue JWT
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
-    res.status(201).json({ message: 'Registration successful! 100 Vitacoins credited.', token, user });
+    console.log('Headers:', req.headers);
+    console.log('Register request body:', req.body); // Log incoming data
+      const { name, username, email, password } = req.body;
+      if (!name || !username || !email || !password) {
+        return res.status(400).json({ error: 'All fields (name, username, email, password) are required.' });
+      }
+      // Check for existing user
+      const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+      if (existingUser) {
+        return res.status(409).json({ error: 'User already exists.' });
+      }
+      // Create new user
+      const user = new User({ name, username, email, password });
+      await user.save();
+      res.status(201).json({ message: 'User registered successfully.' });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    console.error('Register error:', err);
+    res.status(500).json({ error: 'Internal server error.' });
   }
 });
 
@@ -52,3 +50,5 @@ router.post('/login', async (req, res) => {
 });
 
 export default router;
+
+

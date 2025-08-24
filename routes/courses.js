@@ -91,6 +91,11 @@ router.post('/complete', async (req, res) => {
     if (user.coins >= 1000 && !user.badges.includes('Super Achiever')) {
       user.badges.push('Super Achiever');
     }
+    // Badge for completing this course
+    const courseBadge = `Course Completed: ${course.title}`;
+    if (!user.badges.includes(courseBadge)) {
+      user.badges.push(courseBadge);
+    }
     await user.save();
 
     const tx = new Transaction({ userId, type: 'credit', amount: coins, reason: `Course Completed: ${course.title}` });
