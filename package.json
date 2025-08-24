@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-  "run": "nodemon index.js",
-  "seed:courses": "node scripts/seedCourses.js",
-  "seed:quizzes": "node scripts/seedQuizzes.js"
+    "run": "nodemon index.js",
+    "seed:courses": "node scripts/seedCourses.js",
+    "seed:quizzes": "node scripts/seedQuizzes.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

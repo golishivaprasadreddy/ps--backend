@@ -15,19 +15,23 @@ router.post('/register', async (req, res) => {
   try {
     console.log('Headers:', req.headers);
     console.log('Register request body:', req.body); // Log incoming data
-      const { name, username, email, password } = req.body;
-      if (!name || !username || !email || !password) {
-        return res.status(400).json({ error: 'All fields (name, username, email, password) are required.' });
+      const { name, email, password } = req.body;
+      if (!name || !email || !password) {
+        return res.status(400).json({ error: 'All fields (name, email, password) are required.' });
       }
       // Check for existing user
-      const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+      const existingUser = await User.findOne({ email });
       if (existingUser) {
         return res.status(409).json({ error: 'User already exists.' });
       }
-      // Create new user
-      const user = new User({ name, username, email, password });
+      // Create new user with 100 coins
+      const user = new User({ name, email, password, coins: 100 });
       await user.save();
-      res.status(201).json({ message: 'User registered successfully.' });
+      res.status(201).json({
+        message: 'User registered successfully. You have been awarded 100 coins!',
+        coins: user.coins,
+        announcement: 'All users receive 100 coins upon registration!'
+      });
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ error: 'Internal server error.' });
